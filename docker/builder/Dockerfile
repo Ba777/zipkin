@@ -27,14 +27,13 @@ WORKDIR /code
 # Copy Maven source tree into the Docker context
 COPY . .
 
-# Make sure zipkin-lens can build on Alpine by eagerly caching an unofficial build.
-# Temporarily workaround https://github.com/eirslett/frontend-maven-plugin/pull/853
-COPY docker/builder/download-node.sh .
-RUN ./download-node.sh
+# Install not yet merged Alpine support: https://github.com/eirslett/frontend-maven-plugin/pull/934
+COPY docker/builder/update-frontend-maven-plugin.sh .
+RUN ./update-frontend-maven-plugin.sh
 
 # Use the same command as we suggest in zipkin-server/README.md to hydrate the Maven and NPM cache
 #  * Uses mvn not ./mvnw to reduce layer size: we control the Maven version independently in Docker
-RUN mvn -q --batch-mode -DskipTests -Dlicense.skip=true --also-make -pl zipkin-server package && \
+RUN mvn -q --batch-mode -DskipTests -Dlicense.skip=true --also-make -pl zipkin-server package -Dfrontend-maven-plugin.version=1.10.1-SNAPSHOT && \
     # Delete /code to retain only ~/.m2 and ~/.npm
     cd / && rm -rf /code
 

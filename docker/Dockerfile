@@ -31,7 +31,7 @@ WORKDIR /code
 
 # Use the same command as we suggest in zipkin-server/README.md
 #  * Uses mvn not ./mvnw to reduce layer size: we control the Maven version independently in Docker
-RUN mvn -q --batch-mode -DskipTests -Dlicense.skip=true --also-make -pl zipkin-server package && \
+RUN mvn -q --batch-mode -DskipTests -Dlicense.skip=true --also-make -pl zipkin-server package -Dfrontend-maven-plugin.version=1.10.1-SNAPSHOT && \
     (mkdir -p /zipkin && cp zipkin-server/target/zipkin-server-*-exec.jar /zipkin && cd /zipkin && jar xf *.jar && rm *.jar) && \
     (mkdir -p /zipkin-slim && cp zipkin-server/target/zipkin-server-*-slim.jar /zipkin-slim && cd /zipkin-slim && jar xf *.jar && rm *.jar) && \
     # :zipkin-lens "npm run build" generates the build directory
@@ -51,7 +51,7 @@ MAINTAINER OpenZipkin "https://zipkin.io/"
 COPY docker/builder/install.sh /tmp/
 RUN /tmp/install.sh && rm /tmp/install.sh
 
-# Don't re-issue download-node.sh as it should already be in the Maven cache
+# Don't re-issue update-frontend-maven-plugin.sh as it should already be in the Maven cache
 COPY --from=built /root/.m2 /root/.m2
 COPY --from=built /root/.npm /root/.npm
 
